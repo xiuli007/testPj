@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>安心药房</title>
+  <style>
+    :root {
+      --ink: #183530;
+      --muted: #71827d;
+      --paper: #f7f8f4;
+      --green: #0f8a68;
+      --dark-green: #086a51;
+      --mint: #e4f4eb;
+      --line: #e3e9e4;
+      --sun: #f5b544;
+      --red: #dc6553;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #dfe8e1;
+      color: var(--ink);
+      font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .phone {
+      position: relative;
+      width: min(100%, 430px);
+      min-height: 100vh;
+      margin: 0 auto;
+      overflow: hidden;
+      background: var(--paper);
+      padding-bottom: 88px;
+    }
+
+    header {
+      padding: 20px 20px 16px;
+      background: linear-gradient(150deg, #d8f2e4 0%, #f8faf7 68%);
+    }
+    .topline, .section-title, .order-head, .product-head, .profile-row { display: flex; align-items: center; justify-content: space-between; }
+    .location { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; }
+    .location-mark { color: var(--green); font-size: 18px; }
+    .message { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255,255,255,.8); font-size: 17px; cursor: pointer; }
+    h1 { margin: 20px 0 15px; font: 800 29px/1.1 Georgia, "Songti SC", serif; letter-spacing: 0; }
+    .search { display: flex; align-items: center; gap: 9px; height: 48px; padding: 0 15px; border-radius: 10px; color: #82908b; background: #fff; box-shadow: 0 8px 18px rgba(23,72,56,.07); }
+    .search input { width: 100%; border: 0; outline: 0; color: var(--ink); font: 14px inherit; background: transparent; }
+
+    main { padding: 18px 20px 0; }
+    .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; text-align: center; }
+    .quick { border: 0; color: var(--ink); background: transparent; font: 12px inherit; cursor: pointer; }
+    .quick-icon { display: grid; place-items: center; width: 54px; height: 54px; margin: 0 auto 7px; border-radius: 18px; color: var(--green); font-size: 23px; background: var(--mint); }
+    .quick:nth-child(2) .quick-icon { color: #d47727; background: #fff1da; }
+    .quick:nth-child(3) .quick-icon { color: #4e72b9; background: #e7efff; }
+    .quick:nth-child(4) .quick-icon { color: #c96169; background: #ffe7e7; }
+
+    .doctor-card { display: flex; align-items: center; gap: 12px; margin: 24px 0; padding: 14px; border-radius: 8px; color: #fff; background: var(--dark-green); }
+    .doctor-icon { display: grid; place-items: center; flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; color: var(--dark-green); background: #d6f1df; font-size: 19px; }
+    .doctor-copy strong { display: block; font-size: 15px; }
+    .doctor-copy span { display: block; margin-top: 4px; color: #d4e9df; font-size: 11px; }
+    .doctor-card button { margin-left: auto; padding: 8px 10px; border: 1px solid #6aad98; border-radius: 5px; color: #fff; background: transparent; font: 12px inherit; cursor: pointer; }
+
+    .section-title { margin: 0 0 13px; }
+    .section-title h2 { margin: 0; font: 800 20px Georgia, "Songti SC", serif; }
+    .section-title button { border: 0; color: var(--muted); background: transparent; font: 12px inherit; cursor: pointer; }
+    .category-row { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
+    .category { flex: 0 0 auto; padding: 9px 15px; border: 1px solid var(--line); border-radius: 20px; color: #5d716a; background: #fff; font: 13px inherit; cursor: pointer; }
+    .category.active { border-color: var(--green); color: #fff; background: var(--green); }
+
+    .product-list { display: grid; gap: 11px; }
+    .product { display: grid; grid-template-columns: 75px 1fr; gap: 13px; min-height: 103px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    .product-image { display: grid; place-items: center; border-radius: 6px; font-weight: 800; font-size: 12px; }
+    .blue { color: #347aa0; background: #ddecf2; } .orange { color: #a86419; background: #fae7c9; }
+    .product-copy { min-width: 0; }
+    .product-head h3 { overflow: hidden; margin: 0; font-size: 14px; white-space: nowrap; text-overflow: ellipsis; }
+    .tag { padding: 3px 5px; border-radius: 3px; color: var(--red); background: #fff0ed; font-size: 10px; }
+    .product-copy p { margin: 7px 0; color: var(--muted); font-size: 11px; }
+    .price { color: var(--red); font-size: 18px; font-weight: 800; } .price small { font-size: 11px; font-weight: 400; }
+    .add { float: right; width: 29px; height: 29px; border: 0; border-radius: 50%; color: #fff; background: var(--green); font-size: 21px; line-height: 24px; cursor: pointer; }
+
+    .tabbar { position: absolute; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, 1fr); height: 72px; border-top: 1px solid var(--line); background: rgba(255,255,255,.97); }
+    .tab { border: 0; color: #87948f; background: transparent; font-size: 11px; cursor: pointer; }
+    .tab span { display: block; margin-bottom: 3px; font-size: 20px; }
+    .tab.active { color: var(--green); font-weight: 800; }
+
+    .toast { position: fixed; bottom: 90px; left: 50%; z-index: 4; padding: 11px 16px; border-radius: 6px; color: #fff; background: rgba(24,53,48,.92); font-size: 13px; transform: translate(-50%, 120px); transition: transform .25s ease; }
+    .toast.show { transform: translate(-50%, 0); }
+    @media (min-width: 431px) { .phone { min-height: 860px; margin-top: 20px; border-radius: 18px; box-shadow: 0 15px 50px rgba(21,59,45,.18); } }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <header>
+      <div class="topline"><div class="location"><span class="location-mark">⌖</span> 上海市 · 徐汇区</div><button class="message" aria-label="消息">◌</button></div>
+      <h1>安心药房</h1>
+      <label class="search"><span>⌕</span><input id="search" placeholder="搜索药品、症状或品牌" /></label>
+    </header>
+    <main>
+      <div class="quick-grid">
+        <button class="quick"><span class="quick-icon">♙</span>在线问诊</button>
+        <button class="quick"><span class="quick-icon">▣</span>处方开药</button>
+        <button class="quick"><span class="quick-icon">◒</span>附近药店</button>
+        <button class="quick"><span class="quick-icon">♡</span>健康档案</button>
+      </div>
+      <section class="doctor-card"><div class="doctor-icon">✚</div><div class="doctor-copy"><strong>药师在线守护</strong><span>用药疑问，随时为你解答</span></div><button>立即咨询</button></section>
+      <section>
+        <div class="section-title"><h2>常用药品</h2><button id="more">查看全部 ›</button></div>
+        <div class="category-row" id="categories">
+          <button class="category active">精选推荐</button><button class="category">感冒发热</button><button class="category">肠胃不适</button><button class="category">维生素</button>
+        </div>
+      </section>
+      <section style="margin-top:20px"><div class="product-list" id="products">
+        <article class="product"><div class="product-image blue">感康<br>复方氨酚烷胺</div><div class="product-copy"><div class="product-head"><h3>复方氨酚烷胺片</h3><span class="tag">常用</span></div><p>12片/盒 · 缓解普通感冒症状</p><strong class="price"><small>¥</small>18.80</strong><button class="add" data-name="复方氨酚烷胺片">+</button></div></article>
+        <article class="product"><div class="product-image orange">江中<br>健胃消食片</div><div class="product-copy"><div class="product-head"><h3>健胃消食片</h3><span class="tag">热销</span></div><p>0.8g×32片 · 健胃消食</p><strong class="price"><small>¥</small>16.50</strong><button class="add" data-name="健胃消食片">+</button></div></article>
+      </div></section>
+    </main>
+    <nav class="tabbar"><button class="tab active"><span>⌂</span>首页</button><button class="tab"><span>⌕</span>找药</button><button class="tab"><span>▣</span>处方</button><button class="tab"><span>♙</span>我的</button></nav>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script>
+    const toast = document.querySelector('#toast');
+    let timer;
+    function notify(message) { toast.textContent = message; toast.classList.add('show'); clearTimeout(timer); timer = setTimeout(() => toast.classList.remove('show'), 1800); }
+    document.querySelectorAll('.add').forEach(button => button.addEventListener('click', () => notify(`${button.dataset.name} 已加入购药清单`)));
+    document.querySelectorAll('.category').forEach(button => button.addEventListener('click', () => { document.querySelector('.category.active').classList.remove('active'); button.classList.add('active'); notify(`已筛选：${button.textContent}`); }));
+    document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => { document.querySelector('.tab.active').classList.remove('active'); button.classList.add('active'); notify(`${button.textContent.trim()}页面原型`); }));
+    document.querySelector('.doctor-card button').addEventListener('click', () => notify('正在为你接通药师...'));
+    document.querySelector('#more').addEventListener('click', () => notify('药品列表已展开（原型演示）'));
+    document.querySelector('#search').addEventListener('keydown', event => { if (event.key === 'Enter') notify(`正在搜索：${event.currentTarget.value || '全部药品'}`); });
+  </script>
+</body>
+</html>
