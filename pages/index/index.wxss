@@ -1,0 +1,39 @@
+.page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 52rpx 40rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  box-shadow: 0 16rpx 48rpx rgba(27, 74, 56, 0.08);
+}
+
+.eyebrow {
+  color: #168263;
+  font-size: 22rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.title {
+  margin-top: 28rpx;
+  color: #193b30;
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.description {
+  margin-top: 20rpx;
+  color: #71817b;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
