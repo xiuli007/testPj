@@ -214,6 +214,8 @@ public sealed class TimelineFollowState
 {
     public bool IsFollowingTail { get; private set; } = true;
 
+    public void Reset() => IsFollowingTail = true;
+
     public void OnScroll(double verticalOffset, double scrollableHeight, bool extentChanged)
     {
         if (extentChanged)

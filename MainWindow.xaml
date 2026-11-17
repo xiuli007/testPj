@@ -194,8 +194,12 @@
               <TextBlock Text="新字幕追加在末尾；可以向上滚动回看本次会话。"
                          Margin="0,4,0,0" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
             </StackPanel>
-            <TextBlock Grid.Column="1" Text="{Binding Captions.Count, StringFormat=本次 {0} 条}"
-                       Foreground="#B9C8DC" FontSize="12" VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+              <TextBlock Text="{Binding Captions.Count, StringFormat=显示 {0} 条}"
+                         Foreground="#B9C8DC" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <Button Content="清除字幕" Command="{Binding ClearCaptionsCommand}"
+                      ToolTip="仅清空主窗口和悬浮窗显示；保留 CSV 和待写记录，不停止识别。"/>
+            </StackPanel>
           </Grid>
           <ListBox x:Name="CaptionTimeline" ItemsSource="{Binding Captions}" Height="260"
                    Background="#19283D" Foreground="#F0F4FA" BorderBrush="#465C77"
@@ -240,7 +244,7 @@
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
-          <TextBlock Text="历史保存默认关闭。未开启时，本次记录只在当前窗口内；关闭程序后不会保留。"
+          <TextBlock Text="清除仅影响两窗显示，不删除 CSV 或内存中的待写记录。历史保存默认关闭；未写入的记录在关闭程序后不会保留。"
                      Foreground="{StaticResource MutedBrush}" FontSize="11" TextWrapping="Wrap"
                      Margin="2,9,2,0"/>
         </StackPanel>
@@ -270,7 +274,7 @@
                        FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"
                        MaxWidth="760" Margin="0,0,0,8"/>
           </WrapPanel>
-          <TextBlock Text="设置保存在当前 Windows 用户的 LocalAppData；文件路径由你选择。若写入失败，状态会明确提示，未写入字幕会留在本次窗口并可重试。"
+          <TextBlock Text="设置保存在当前 Windows 用户的 LocalAppData；文件路径由你选择。若写入失败，状态会明确提示，未写入字幕会留在内存中并可重试，清除显示不会丢弃。"
                      Foreground="#B0C0D4" FontSize="11" TextWrapping="Wrap"/>
         </StackPanel>
       </Border>

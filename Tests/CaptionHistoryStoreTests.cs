@@ -172,6 +172,18 @@ public sealed class CaptionHistoryStoreTests
         Assert.True(state.IsFollowingTail);
     }
 
+    [Fact]
+    public void ClearingTimelineResumesFollowingNewCaptions()
+    {
+        var state = new TimelineFollowState();
+        state.OnScroll(verticalOffset: 0, scrollableHeight: 500, extentChanged: false);
+        Assert.False(state.IsFollowingTail);
+
+        state.Reset();
+
+        Assert.True(state.IsFollowingTail);
+    }
+
     private static string CreateTemporaryDirectory()
     {
         var path = Path.Combine(Path.GetTempPath(), $"caption-history-test-{Guid.NewGuid():N}");

@@ -14,7 +14,7 @@ namespace JapaneseTranscriptionPrototype.ViewModels;
 public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
 {
     private readonly AudioCaptureService _audioCaptureService = new();
-    private readonly CaptionHistorySettingsStore _captionHistorySettings = new();
+    private readonly CaptionHistorySettingsStore _captionHistorySettings;
     private readonly CaptionHistoryFile _captionHistoryFile = new();
     private readonly Queue<CaptionResult> _unpersistedCaptions = new();
     private CancellationTokenSource? _transcriptionCancellation;
@@ -49,8 +49,11 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     private bool _historySavingEnabled;
     private bool _historySessionActive;
 
-    public MainViewModel()
+    public MainViewModel() : this(new CaptionHistorySettingsStore()) { }
+
+    internal MainViewModel(CaptionHistorySettingsStore captionHistorySettings)
     {
+        _captionHistorySettings = captionHistorySettings;
         AudioInputs = [];
         _captionStatus = "正在加载音频设备；窗口已可交互。";
         SelectedAudioInput = AudioInputs.FirstOrDefault(device => device.IsLoopback) ?? AudioInputs.FirstOrDefault();
@@ -72,6 +75,7 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
         TestFileCommand = new AsyncRelayCommand(TestFileAsync, () => !LiveBusy && !IsRecording && !IsTranscribing);
         ChooseHistoryFileCommand = new AsyncRelayCommand(() => ChooseHistoryFileAsync(enableAfterSelect: false));
         ToggleHistorySavingCommand = new AsyncRelayCommand(ToggleHistorySavingAsync);
+        ClearCaptionsCommand = new RelayCommand(ClearCaptions);
         RefreshDevicesCommand = new AsyncRelayCommand(RefreshDevicesAsync,
             () => _live is null && !LiveBusy && !IsRecording && !IsTranscribing && !_devicesLoading);
         foreach (var command in new[]
@@ -209,6 +213,7 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     public AsyncRelayCommand TestFileCommand { get; }
     public AsyncRelayCommand ChooseHistoryFileCommand { get; }
     public AsyncRelayCommand ToggleHistorySavingCommand { get; }
+    public RelayCommand ClearCaptionsCommand { get; }
     public AsyncRelayCommand RefreshDevicesCommand { get; }
     public string WorkerPath { get; }
     public ObservableCollection<CaptionResult> Captions { get; } = [];
@@ -328,7 +333,7 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
         await ChangeHistoryFileAsync(dialog.FileName, HistorySavingEnabled || enableAfterSelect);
     }
 
-    private async Task ChangeHistoryFileAsync(string path, bool enable)
+    internal async Task ChangeHistoryFileAsync(string path, bool enable)
     {
         var normalizedPath = Path.GetFullPath(path);
         try
@@ -423,14 +428,21 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
         }
     }
 
-    private async Task AddCaptionAsync(CaptionResult result)
+    private void ClearCaptions()
+    {
+        Captions.Clear();
+        LatestJapanese = string.Empty;
+        LatestChinese = string.Empty;
+    }
+
+    internal async Task AddCaptionAsync(CaptionResult result)
     {
         LatestJapanese = result.Japanese;
         LatestChinese = result.Chinese;
         Captions.Add(result);
         _unpersistedCaptions.Enqueue(result);
         OnPropertyChanged(nameof(UnpersistedCaptionCount));
-        CaptionStatus = $"本段识别 + 翻译 {result.Seconds:0.00} 秒；采集窗口最多 6 秒，安静时不识别。";
+        CaptionStatus = $"本段识别 + 翻译 {result.Seconds:0.00} 秒；按停顿分段，连续音频最多 20 秒，安静时不识别。";
         if (HistorySavingEnabled && _historySessionActive)
             await FlushUnpersistedCaptionsAsync();
         else
@@ -450,7 +462,7 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
             catch (Exception exception)
             {
                 HistoryStatus =
-                    $"历史追加失败，未确认保存（{_unpersistedCaptions.Count} 条仍在当前窗口）：{exception.Message}。修复路径后重新开启保存可重试。";
+                    $"历史追加失败，未确认保存（{_unpersistedCaptions.Count} 条仍在内存中）：{exception.Message}。修复路径后重新开启保存可重试。";
                 return false;
             }
         }
@@ -468,10 +480,10 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
         }
 
         HistoryStatus = HistorySavingEnabled
-            ? $"历史保存已配置但未能开启：{HistoryFilePath}。当前窗口有 {_unpersistedCaptions.Count} 条尚未写入。"
+            ? $"历史保存已配置但未能开启：{HistoryFilePath}。内存中有 {_unpersistedCaptions.Count} 条尚未写入。"
             : string.IsNullOrWhiteSpace(HistoryFilePath)
-                ? $"跨会话历史未配置/未启用；当前窗口有 {_unpersistedCaptions.Count} 条未写入，关闭程序后不会保留。"
-                : $"跨会话历史已暂停；当前窗口有 {_unpersistedCaptions.Count} 条未写入。文件：{HistoryFilePath}";
+                ? $"跨会话历史未配置/未启用；内存中有 {_unpersistedCaptions.Count} 条未写入，关闭程序后不会保留。"
+                : $"跨会话历史已暂停；内存中有 {_unpersistedCaptions.Count} 条未写入。文件：{HistoryFilePath}";
     }
 
     private DateTimeOffset GetHistorySessionStartTime() =>

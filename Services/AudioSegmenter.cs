@@ -3,35 +3,64 @@ namespace JapaneseTranscriptionPrototype.Services;
 public sealed class AudioSegmenter
 {
     public const int SampleRate = 16000;
-    public const int SegmentSamples = SampleRate * 6;
+    public const int SegmentSamples = SampleRate * 20;
+    public const int FrameSamples = SampleRate / 50;
+    public const int PauseSamples = SampleRate * 8 / 10;
+    private const int PreRollSamples = SampleRate / 5;
     private readonly float[] _buffer = new float[SegmentSamples];
     private int _count;
+    private int _frameCount;
     private int _silence;
+    private bool _hasSpeech;
     public event Action<float[]>? SegmentReady;
+    public event Action? SegmentLimitReached;
 
     public void Add(float sample)
     {
         _buffer[_count++] = sample;
-        _silence = Math.Abs(sample) < 0.008 ? _silence + 1 : 0;
-        if (_silence >= SampleRate && _count >= SampleRate * 2)
+        if (++_frameCount < FrameSamples) return;
+        _frameCount = 0;
+
+        // Frame energy tolerates waveform zero crossings; it is not semantic VAD.
+        if (HasSpeechEnergy(_buffer.AsSpan(_count - FrameSamples, FrameSamples)))
+        {
+            _hasSpeech = true;
+            _silence = 0;
+        }
+        else
+        {
+            _silence = Math.Min(_silence + FrameSamples, PauseSamples);
+        }
+
+        if (!_hasSpeech)
+        {
+            if (_count > PreRollSamples)
+            {
+                Array.Copy(_buffer, _count - PreRollSamples, _buffer, 0, PreRollSamples);
+                _count = PreRollSamples;
+            }
+            return;
+        }
+        if (_silence >= PauseSamples)
         {
             Flush();
             return;
         }
         if (_count != _buffer.Length) return;
-        var segment = _buffer.ToArray();
-        _count = 0;
-        _silence = 0;
-        if (HasSpeechEnergy(segment)) SegmentReady?.Invoke(segment);
+        SegmentLimitReached?.Invoke();
+        Flush();
     }
 
     public void Flush()
     {
-        if (_count < SampleRate / 2) { _count = 0; return; }
-        var segment = _buffer[.._count];
+        var segment = _count >= SampleRate / 2 && HasSpeechEnergy(_buffer.AsSpan(0, _count))
+            ? _buffer[.._count]
+            : null;
         _count = 0;
+        _frameCount = 0;
         _silence = 0;
-        if (HasSpeechEnergy(segment)) SegmentReady?.Invoke(segment);
+        _hasSpeech = false;
+        if (segment is not null) SegmentReady?.Invoke(segment);
     }
 
     // Energy gating is not semantic VAD: background music/noise can still pass.

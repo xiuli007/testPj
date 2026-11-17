@@ -88,10 +88,15 @@
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <TextBlock Text="{Binding CaptionStatus}" FontSize="11"
                    Foreground="#D4DFEE" TextWrapping="Wrap" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="1" Text="{Binding Captions.Count, StringFormat={}{0} 条}"
+        <Button Grid.Column="1" Content="清除字幕" Command="{Binding ClearCaptionsCommand}"
+                Background="#40536D" Foreground="#E0E9F5" BorderBrush="#7188A7"
+                Padding="8,4" Margin="10,0,0,0"
+                ToolTip="仅清空两窗显示；保留 CSV 和待写记录，不停止识别。"/>
+        <TextBlock Grid.Column="2" Text="{Binding Captions.Count, StringFormat={}{0} 条}"
                    FontSize="11" Foreground="#BCCBDF" VerticalAlignment="Center" Margin="10,0,0,0"/>
       </Grid>
     </Grid>

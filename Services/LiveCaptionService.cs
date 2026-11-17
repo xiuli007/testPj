@@ -60,6 +60,8 @@ public sealed class LiveCaptionService : IAsyncDisposable
             throw new InvalidDataException("请选择单声道或立体声输出；当前设备为多声道，请在 Windows 中改为立体声。");
         _resampled = new WdlResamplingSampleProvider(source, AudioSegmenter.SampleRate);
         _segmenter = new AudioSegmenter();
+        _segmenter.SegmentLimitReached += () =>
+            Status?.Invoke("连续音频已达 20 秒上限，已强制分段；可能截断句子。");
         _segmenter.SegmentReady += samples =>
         {
             if (!_segments.Writer.TryWrite(samples))

@@ -64,6 +64,7 @@ public partial class CaptionOverlay : Window
 
     private void TimelineCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
     {
+        if (args.Action == NotifyCollectionChangedAction.Reset) _timelineFollow.Reset();
         if (_timelineFollow.IsFollowingTail)
             Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(ScrollToLatestCaption));
     }
