@@ -1,0 +1,6 @@
+ctranslate2==4.9.0
+numpy==2.5.4
+opencc-python-reimplemented==0.1.7
+sherpa-onnx==2.0.1
+sherpa-onnx-core==2.0.1
+tokenizers==0.23.3
