@@ -4,7 +4,18 @@ obj/
 dotnet-install.ps1
 .runtime/
 .translation/
-models/
+# Keep source in Models/ while excluding model assets.
+models/*
+!models/*.cs
+*.onnx
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+*.pt
+*.pth
+*.ckpt
+*.tflite
 test_wavs/
 JapaneseTranscriptionPrototype/
 whisper-source/
